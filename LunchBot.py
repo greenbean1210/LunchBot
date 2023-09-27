@@ -57,8 +57,6 @@ vote_dict = {}  # 투표 결과를 저장할 딕셔너리
 user_votes = {}  # 각 사용자의 투표 상태. {user_id: {message_id: emoji}} 형태
 
 yesterday_menu_info = None
-version = ""
-
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
@@ -119,14 +117,11 @@ async def on_ready():
 @app.command()
 async def versioncheck(ctx):
     global version
-    logger.debug("version")
     version_manager.check_commit()  # 커밋 확인
     version = f'현재 봇의 버전은 {version_manager.major_version}.{version_manager.minor_version} 입니다.'
 
 # 급식 정보 보내기
 async def menu_notice():
-    global yesterday_menu_info
-    logger.debug("menu_notice 호출됨")
     # now = datetime.now()
     # next_run_time = now + timedelta(days=1)
     # scheduler.add_job(menu_notice, 'date', run_date=next_run_time)
@@ -135,8 +130,7 @@ async def menu_notice():
 
     embed = discord.Embed(title="🍚 급식 정보", description="오늘의 급식 정보입니다.", color=0x00ff00)
     embed.add_field(name=get_menu_info(), value="", inline=False)
-    yesterday_menu_info = get_menu_info()
-    logger.debug("yesterday_menu_info = get_menu_info()")
+    
     await channel.send(embed=embed)
 
 
@@ -144,12 +138,32 @@ async def menu_notice():
 # 급식 의견 받기
 async def menu_rating():
     global vote_dict  # 전역 변수 사용
+    global yesterday_menu_info
+
 
     # 현재 날짜와 시간 가져오기
-    now = datetime.datetime.now()
+    now = datetime.now()
+    date_str = datetime.now().strftime('%Y%m%d')
+
+    try:
+        # 현재 스크립트 파일의 절대 경로를 구하고, 그 경로에서 디렉토리 부분만 추출
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # 결과 저장 디렉토리 설정
+        result_dir = os.path.join(script_dir, 'results')
+
+        # 결과 저장 파일 경로 설정
+        result_file_path = os.path.join(result_dir, f'results_{date_str}.txt')
+
+    except Exception as e:
+        logger.error(f"저장 디렉토리 설정 중 에러: {e}")
+
+    
+
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
 
     if now.strftime("%a").lower() != "sat": # 토요일이 아닐 경우 실행(토요일은 급식이 없음)
-
         channel = app.get_channel(1144834533200498738)
         logchannel = app.get_channel(1144838499472789604)
         
@@ -169,15 +183,13 @@ async def menu_rating():
     if now.strftime("%a").lower() != "mon": # 월요일이 아닐 경우 실행(월요일은 전날의 결과가 없음)
         # 전날의 결과 저장
         try: 
-            file_path = os.path.join(os.path.dirname(__file__), 'vote_result.pkl')
+            pkl_file_path = os.path.join(os.path.dirname(__file__), 'vote_result.pkl')
 
-            logger.debug(f"다음 경로의 파일을 엽니다... {file_path}")
+            logger.debug(f"다음 경로의 파일을 엽니다... {pkl_file_path}")
             results_text= "" #results_text 초기화
 
-            with open(file_path, 'rb') as f:  
+            with open(pkl_file_path, 'rb') as f:  
                 data = pickle.load(f)
-                date_str = datetime.now().strftime('%Y%m%d')
-
                 results_text= "투표 결과:\n"
 
                 # 오늘의 급식 메뉴 추가 
@@ -225,41 +237,43 @@ async def menu_rating():
                     except Exception as e:
                         await loggererror(f"메시지 정보 가져오는 중 오류: {e}", logchannel)
 
+                    
+            # 특정 채널의 메시지 정보가 담긴 파일이 있다면 그 내용을 추가합니다.
+            suggestions_file_path = os.path.join(os.path.dirname(__file__), 'suggestions.pkl')
+            try:
+                with open(suggestions_file_path, 'rb') as msg_file:
+                    messages = pickle.load(msg_file)
 
-                try:
-                    with open(f'results/results_{date_str}.txt', 'w', encoding='utf-8') as f:
-                        logger.debug(results_text)
-                        f.write(results_text)
-                        logger.info("쓰기 완료")
-                except Exception as e:
-                    logger.error(f"파일 쓰기 중 에러: {e}")
+                    results_text += "건의사항:\n"
+                    for msg in messages:  # 각각의 메시지 정보를 추가합니다.
+                        results_text += msg + "\n"
 
-                
-                # 특정 채널의 메시지 정보가 담긴 파일이 있다면 그 내용을 추가합니다.
-                file_path = os.path.join(os.path.dirname(__file__), 'suggestions.pkl')
-                if os.path.exists(file_path):
-                    with open(file_path, 'rb') as msg_file:
-                        messages = pickle.load(msg_file)
+            except Exception as e:
+                    logger.error(f"건의사항 불러오기 중 에러: {e}")
+
+
+            try:
+                with open(result_file_path, 'w', encoding='utf-8') as f:
+                    logger.debug(results_text)
+                    f.write(results_text)
+                    logger.info("쓰기 완료")
+            except Exception as e:
+                logger.error(f"파일 쓰기 중 에러: {e}")
+
             
-                    with open(f'results/results_{date_str}.txt', 'a', encoding='utf-8') as result_file:
-                        for msg in messages:  # 각각의 메시지 정보를 추가합니다.
-                            result_file.write(msg + "\n")
-                            
+        
+            try:
+                await logchannel.send(file=discord.File(result_file_path))
+                logger.info("logchannel 전송 완료")
+                
+            except discord.Forbidden:
+                await logchannel.send("전날의 투표 결과를 보낼 수 없습니다.\n메시지 전송 권한을 확인해주세요.")
 
-                    
-
-                try:
-                    await logchannel.send(file=discord.File(f'results_{date_str}.txt'))
-                    logger.info("logchannel 전송 완료")
-                    
-                except discord.Forbidden:
-                    await logchannel.send("전날의 투표 결과를 보낼 수 없습니다.\n메시지 전송 권한을 확인해주세요.")
-
-                except Exception as e:
-                    logger.error(f"파일 전송 중 에러: {e}")
+            except Exception as e:
+                logger.error(f"파일 전송 중 에러: {e}")
                 
         except Exception as e: 
-            await logchannel.send(e)
+            await embedwarning(e)
 
         # 'vote_result.pkl' 초기화하기 
         with open(os.path.join(os.path.dirname(__file__), 'vote_result.pkl'), 'wb') as f:
@@ -272,6 +286,9 @@ async def menu_rating():
             pickle.dump([], f)
             pickle.dump([], f)
             logger.info("suggestions.pkl 초기화 성공.")
+
+        yesterday_menu_info = get_menu_info()
+
             
 
 
@@ -302,7 +319,9 @@ async def 급식(ctx, *, args=None):
     
 @app.command(pass_context=True)
 async def gr(ctx, *, args=None):
+    logger.debug("VBBB")
     await menu_rating()
+    logger.debug("dsdsadsds")
 
 @app.command(pass_context=True)
 async def vd(ctx, *, args=None):
@@ -583,7 +602,7 @@ async def 도움말(ctx):
     embed = discord.Embed(title="도움말", description="급식이#2677 도움말입니다.", timestamp=datetime.now(), color=0x5CA182)
 
     embed.add_field(name="테스트 도움말 메시지", value="value", inline=False)
-    embed.add_field(name="명령어 목록", value="`급식이 명령어` 로 확인\n!gr : menu_rating()\n!vd : logger.debug(vote_dict)\n !급식 : menu_notice()\n!vwpk : View vote_results.pkl\n!vwspk : View suggestions.pkl\n!send_result : Send results.txt\n!list_results : Send results.txt list\n!list_results : Reset vote_results.pkl\n !stop : Stop Bot", inline=True)
+    embed.add_field(name="명령어 목록", value="`급식이 명령어` 로 확인\n!gr : menu_rating()\n!vd : logger.debug(vote_dict)\n!급식 : menu_notice()\n!vwpk : View vote_results.pkl\n!vwspk : View suggestions.pkl\n!send_result : Send results.txt\n!list_results : Send results.txt list\n!list_results : Reset vote_results.pkl\n !stop : Stop Bot", inline=True)
     embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
 
     embed.set_author(name="급식이#2677", icon_url="https://cdn.discordapp.com/attachments/816942503734542368/877543719132364850/web_hi_res_512.png")
