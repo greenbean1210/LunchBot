@@ -227,7 +227,7 @@ async def menu_rating():
 
 
                 try:
-                    with open(f'results_{date_str}.txt', 'w', encoding='utf-8') as f:
+                    with open(f'results/results_{date_str}.txt', 'w', encoding='utf-8') as f:
                         logger.debug(results_text)
                         f.write(results_text)
                         logger.info("쓰기 완료")
@@ -241,7 +241,7 @@ async def menu_rating():
                     with open(file_path, 'rb') as msg_file:
                         messages = pickle.load(msg_file)
             
-                    with open(f'results_{date_str}.txt', 'a', encoding='utf-8') as result_file:
+                    with open(f'results/results_{date_str}.txt', 'a', encoding='utf-8') as result_file:
                         for msg in messages:  # 각각의 메시지 정보를 추가합니다.
                             result_file.write(msg + "\n")
                             
