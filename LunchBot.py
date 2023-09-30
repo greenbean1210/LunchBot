@@ -115,9 +115,7 @@ async def on_ready():
 
 @app.command()
 async def versioncheck(ctx):
-    global version
     version_manager.check_commit()  # 커밋 확인
-    version = f'현재 봇의 버전은 {version_manager.major_version}.{version_manager.minor_version} 입니다.'
 
 # 급식 정보 보내기
 async def menu_notice():
@@ -595,13 +593,14 @@ async def rmpk(ctx):
 
 @app.command()
 async def 도움말(ctx):
+    version_manager.check_commit()
     version = f'{version_manager.major_version}.{version_manager.minor_version}'
 
     ping = (round(app.latency * 1000))
     embed = discord.Embed(title="도움말", description="급식이#2677 도움말입니다.", timestamp=datetime.now(), color=0x5CA182)
 
     embed.add_field(name="테스트 도움말 메시지", value="value", inline=False)
-    embed.add_field(name="명령어 목록", value="`급식이 명령어` 로 확인\n!gr : menu_rating()\n!vd : logger.debug(vote_dict)\n!급식 : menu_notice()\n!vwpk : View vote_results.pkl\n!vwspk : View suggestions.pkl\n!send_result : Send results.txt\n!list_results : Send results.txt list\n!list_results : Reset vote_results.pkl\n !stop : Stop Bot", inline=True)
+    embed.add_field(name="명령어 목록", value="`급식이 명령어` 로 확인\n!gr : menu_rating()\n!vd : logger.debug(vote_dict)\n!급식 : menu_notice()\n!vwpk : View vote_results.pkl\n!vwspk : View suggestions.pkl\n!send_result : Send results.txt\n!list_results : Send results.txt list\n!list_results : Reset vote_results.pkl\n !stop : Stop Bo\n !addnote: 패치 노트에 내용 추가\n!readnote: 패치 노트 내용 읽기\n!delnote: 패치 노트 내용 삭제", inline=True)
     embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
 
     embed.set_author(name="급식이#2677", icon_url="https://cdn.discordapp.com/attachments/816942503734542368/877543719132364850/web_hi_res_512.png")
@@ -611,6 +610,53 @@ async def 도움말(ctx):
     embed.add_field(name="버전", value=version + " Beta", inline=False)
 
     await ctx.channel.send (embed=embed)
+
+
+@app.command()
+async def addnote(ctx, *, note: str):
+    with open('patch_notes.txt', 'a') as file:
+        file.write(note + '\n')
+    await ctx.send(f'패치 노트에 추가됨: {note}')
+
+@app.command()
+async def readnote(ctx):
+    with open('patch_notes.txt', 'r') as file:
+        notes = file.read()
+    await ctx.send(f'현재 패치 노트 내용:\n{notes}')
+
+@app.command()
+async def delnote(ctx, *, note: str):
+    with open('patch_notes.txt', 'r') as file:
+        lines = file.readlines()
+
+        # Check if the note exists in the file
+    if note + '' not in lines:
+        await ctx.send(f'존재하지 않는 내용: {note}')
+        return
+
+    with open('patch_notes.txt', 'w') as file:
+        for line in lines:
+            if line.strip("\n") != note:
+                file.write(line)
+
+    await ctx.send(f'내용 삭제됨: {note}')
+
+@app.command()
+async def patchnote(ctx):
+    with open('patch_notes.txt', 'r') as file:
+        notes = file.read()
+
+    version_manager.check_commit()
+    version = f'{version_manager.major_version}.{version_manager.minor_version}'
+
+
+    # Create an embed message
+    embed = discord.Embed(title=f"📝 {version}버전 패치 노트", description=notes, color=0x00ff00)
+    channel = app.get_channel(1144839284617117736)
+    await channel.send(embed=embed)
+
+
+
 
 @app.command()
 async def send_result(ctx, date: str):
@@ -648,6 +694,20 @@ async def stop(ctx):
     else:
         await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
+@app.command()
+async def version(ctx):
+    version_manager.check_commit()
+    version = f'{version_manager.major_version}.{version_manager.minor_version}'
+    await ctx.send(f"현재 버전은 {version}입니다.")
+
+
+@app.command()
+async def increment_minor(ctx):
+    version_manager.increment_minor()
+
+@app.command()
+async def decrement_minor(ctx):
+    version_manager.decrement_minor()
 
 
 # 디버그 코드 함수

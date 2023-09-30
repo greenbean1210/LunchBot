@@ -50,6 +50,10 @@ class VersionManager:
     def increment_minor(self):
         self.minor_version += 1
         self.save_version()
+    
+    def decrement_minor(self):
+        self.minor_version -= 1
+        self.save_version()
 
     def check_commit(self):
         current_commit_hash = self.get_current_commit_hash()
