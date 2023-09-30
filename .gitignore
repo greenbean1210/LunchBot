@@ -1,1 +1,4 @@
 results/*
+version.txt
+*.pkl
+commit_hash.txt
