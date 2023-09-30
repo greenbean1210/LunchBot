@@ -25,8 +25,6 @@ from discord.ext import commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta
 from pytz import timezone
-from Lunch_info import get_menu_info
-from Token_info import get_token
 from version_manager import VersionManager
 import os
 import pickle
@@ -36,7 +34,8 @@ import sys
 import logging
 import colorlog
 
-
+from Lunch_info import get_menu_info
+from Token_info import get_token
 
 version_manager = VersionManager('version.txt', 'commit_hash.txt')
 
