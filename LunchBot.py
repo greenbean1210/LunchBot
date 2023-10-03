@@ -594,7 +594,7 @@ async def rmpk(ctx):
 
 @app.command()
 async def 도움말(ctx):
-    embed = help()
+    embed = await help()
     ping = (round(app.latency * 1000))
     embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
     await ctx.channel.send (embed=embed)

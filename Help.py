@@ -18,18 +18,19 @@ async def help():
 
     embed.add_field(name="테스트 도움말 메시지", value="value", inline=False)
     embed.add_field(name=
-                    "명령어 목록", value="""`급식이 명령어` 로 확인\n
-                    !gr : menu_rating()\n
-                    !vd : logger.debug(vote_dict)\n
-                    !급식 : menu_notice()\n
-                    !vwpk : View vote_results.pkl\n
-                    !vwspk : View suggestions.pkl\n
-                    !send_result : Send results.txt\n
-                    !list_results : Send results.txt list\n
-                    !list_results : Reset vote_results.pkl\n
-                    !stop : Stop Bo\n !addnote: 패치 노트에 내용 추가\n
-                    !readnote: 패치 노트 내용 읽기\n
-                    !delnote: 패치 노트 내용 삭제"""
+"명령어 목록", value="""
+!gr : menu_rating()
+!vd : logger.debug(vote_dict)
+!급식 : menu_notice()
+!vwpk : View vote_results.pkl
+!vwspk : View suggestions.pkl
+!send_result : Send results.txt
+!list_results : Send results.txt list
+!list_results : Reset vote_results.pkl
+!stop : Stop Bot
+!addnote: 패치 노트에 내용 추가
+!readnote: 패치 노트 내용 읽기
+!delnote: 패치 노트 내용 삭제"""
                     , inline=True)
 
     embed.set_author(name="급식이#2677", icon_url="https://cdn.discordapp.com/attachments/816942503734542368/877543719132364850/web_hi_res_512.png")
