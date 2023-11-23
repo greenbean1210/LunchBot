@@ -126,12 +126,14 @@ async def menu_notice():
     # now = datetime.now()
     # next_run_time = now + timedelta(days=1)
     # scheduler.add_job(menu_notice, 'date', run_date=next_run_time)
-    today_menu, today_allergens = get_menu_info()
+    today_menu_list, today_allergens__list = get_menu_info()
     
+    today_menu = '\n'.join(today_menu_list)
+    today_allergens = '\n'.join(today_allergens__list)
     channel = app.get_channel(1144834533200498738)
 
-    embed = discord.Embed(title="🍚 급식 정보", description="오늘의 급식 정보입니다.", color=0x00ff00)
-    embed.add_field(name=today_menu, value="", inline=False)
+    embed = discord.Embed(title="🍚 오늘의 급식", description=today_menu, color=0x00ff00)
+    # embed.add_field(name=today_menu, value="", inline=False)
     
     await channel.send(embed=embed)
 
