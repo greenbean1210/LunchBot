@@ -34,9 +34,10 @@ import sys
 import logging
 import colorlog
 
-from Lunch_info import get_menu_info
+# from Lunch_info import get_menu_info
 from Token_info import get_token
 from Help import help
+from Menu_info import get_menu_info
 
 version_manager = VersionManager('version.txt', 'commit_hash.txt')
 
@@ -56,6 +57,8 @@ token = get_token()
 vote_dict = {}  # 투표 결과를 저장할 딕셔너리
 user_votes = {}  # 각 사용자의 투표 상태. {user_id: {message_id: emoji}} 형태
 
+today_menu = []
+today_allergens = []
 yesterday_menu_info = None
 
 
@@ -123,11 +126,12 @@ async def menu_notice():
     # now = datetime.now()
     # next_run_time = now + timedelta(days=1)
     # scheduler.add_job(menu_notice, 'date', run_date=next_run_time)
+    today_menu, today_allergens = get_menu_info()
     
     channel = app.get_channel(1144834533200498738)
 
     embed = discord.Embed(title="🍚 급식 정보", description="오늘의 급식 정보입니다.", color=0x00ff00)
-    embed.add_field(name=get_menu_info(), value="", inline=False)
+    embed.add_field(name=today_menu, value="", inline=False)
     
     await channel.send(embed=embed)
 
@@ -166,7 +170,7 @@ async def menu_rating():
         logchannel = app.get_channel(1144838499472789604)
         
         embed = discord.Embed(title="🤔 오늘의 급식은 어떠셨나요?", description="오늘의 급식에 대해 알려주세요.", color=0x00ff00)
-        embed.add_field(name="오늘의 급식이 뭐였냐면...", value=get_menu_info(), inline=False)
+        embed.add_field(name="오늘의 급식이 뭐였냐면...", value=today_menu, inline=False)
         embed.add_field(name="아래의 이모지를 눌러주세요.", value="하나만 누를 수 있습니다.", inline=False)
 
 
