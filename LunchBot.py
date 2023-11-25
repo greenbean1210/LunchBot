@@ -600,10 +600,13 @@ async def rmpk(ctx):
 
 @app.command()
 async def 도움말(ctx):
-    embed = await help()
-    ping = (round(app.latency * 1000))
-    embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
-    await ctx.channel.send (embed=embed)
+    try:
+        embed = await help()
+        ping = (round(app.latency * 1000))
+        embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
+        await ctx.channel.send (embed=embed)
+    except Exception as e:
+        print(e)
 
 
 @app.command()
@@ -669,6 +672,7 @@ async def send_result(ctx, date: str):
 
 @app.command()
 async def list_results(ctx):
+    print(os.listdir())
     result_files = [filename for filename in os.listdir() if filename.startswith('results_')]
     
     if not result_files:

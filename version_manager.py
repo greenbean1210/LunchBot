@@ -10,14 +10,12 @@ version_file = os.path.join(script_dir, 'version.txt')
 commit_hash_file = os.path.join(script_dir, 'commit_hash.txt')
 
 
-
 class VersionManager:
     def __init__(self, version_file, commit_hash_file):
         self.version_file = version_file
         self.commit_hash_file = commit_hash_file
         self.major_version, self.minor_version = self.load_version()
         self.commit_hash = self.load_commit_hash()
-
     def load_version(self):
         try:
             with open(self.version_file, 'r') as f:

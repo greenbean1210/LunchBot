@@ -3,11 +3,6 @@ import json
 from datetime import date
 
 
-# API Set 
-auth_key = "5fa6eda3af554790ab2cfe260d464fce"
-edu_code = "J10"
-school_code = "7530767"
-
 allergen_dict = {
         '1': '난류',
         '2': '우유',
@@ -29,22 +24,27 @@ allergen_dict = {
         '18': '조개류'
     }
 
+# API 값 설정 
+AUTH_KEY = "5fa6eda3af554790ab2cfe260d464fce"
+ATPT_OFCDC_SC_CODE = "J10"
+SD_SCHUL_CODE = "7530767"
 
-def get_today_menu(auth_key, edu_code, school_code):
-    # 오늘의 날짜를 가져옵니다.
+
+def get_today_menu(auth_key, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE):
+    # 오늘의 날짜 가져오기
     today = date.today().strftime("%Y%m%d")
 
     # API 요청을 위한 URL 생성
-    url = f"https://open.neis.go.kr/hub/mealServiceDietInfo?KEY={auth_key}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE={edu_code}&SD_SCHUL_CODE={school_code}&MLSV_YMD={today}"
+    url = f"https://open.neis.go.kr/hub/mealServiceDietInfo?KEY={AUTH_KEY}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE={ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE={SD_SCHUL_CODE}&MLSV_YMD={20231124}"
 
 
     # API 요청 보내기
     response = requests.get(url)
-
+    
     if response.status_code == 200:
         # JSON 데이터 파싱
         data = json.loads(response.text)
-
+        print(data)
         # 메뉴 정보 추출
         menu_string = data["mealServiceDietInfo"][1]["row"][0]["DDISH_NM"]
 
@@ -84,7 +84,7 @@ def check_allergies(menu_raw):
 
 def get_menu_info():
     # 오늘의 급식 정보 받아오기
-    menu_raw = get_today_menu(auth_key, edu_code, school_code)
+    menu_raw = get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE)
     today_menu = check_menu(menu_raw)
     today_allergens = check_allergies(menu_raw)
 
@@ -95,4 +95,5 @@ def get_menu_info():
 
 # print(today_menu)
 # print(today_allergens)
- 
+
+get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE)
