@@ -170,7 +170,8 @@ async def menu_rating():
     if now.strftime("%a").lower() != "sat": # 토요일이 아닐 경우 실행(토요일은 급식이 없음)
         channel = app.get_channel(1144834533200498738)
         logchannel = app.get_channel(1144838499472789604)
-        
+        today_menu_list, today_allergens__list = get_menu_info()
+        today_menu = '\n'.join(today_menu_list)
         embed = discord.Embed(title="🤔 오늘의 급식은 어떠셨나요?", description="오늘의 급식에 대해 알려주세요.", color=0x00ff00)
         embed.add_field(name="오늘의 급식이 뭐였냐면...", value=today_menu, inline=False)
         embed.add_field(name="아래의 이모지를 눌러주세요.", value="하나만 누를 수 있습니다.", inline=False)
@@ -184,7 +185,7 @@ async def menu_rating():
             await msg.add_reaction(emoji)
     
     
-    if now.strftime("%a").lower() != "mon": # 월요일이 아닐 경우 실행(월요일은 전날의 결과가 없음)
+    if now.strftime("%a").lower() != "mon" and now.strftime("%a").lower() == "sat": # 월요일이 아닐 경우, 토요일일 경우 실행(월요일은 전날의 결과가 없고 토요일은 전날인 금요일의 결과를 알려줘야 함)
         # 전날의 결과 저장
         try: 
             pkl_file_path = os.path.join(os.path.dirname(__file__), 'vote_result.pkl')
@@ -310,8 +311,8 @@ def log_status():
 # 스케줄러 설정
 scheduler = AsyncIOScheduler(timezone='Asia/Seoul')
 
-scheduler.add_job(menu_notice, 'cron', day_of_week='mon-fri', hour=8, minute=50) # 8시 50분 급식 메뉴 알림
-scheduler.add_job(menu_rating, 'cron', day_of_week='mon-sat', hour=13, minute=50) # 1시 50분 급식 평가 알림
+scheduler.add_job(menu_notice, 'cron', day_of_week='mon-fri', hour=8, minute=50, id="menu_notice") # 8시 50분 급식 메뉴 알림
+scheduler.add_job(menu_rating, 'cron', day_of_week='mon-sat', hour=13, minute=50, id="menu_rating") # 1시 50분 급식 평가 알림
 scheduler.add_job(log_status, 'cron', minute=0) # "생존신고"
 
 
@@ -330,6 +331,18 @@ async def gr(ctx, *, args=None):
 @app.command(pass_context=True)
 async def vd(ctx, *, args=None):
     logger.debug(vote_dict)
+
+@app.command()
+async def delnotice(ctx):
+    try:
+        for job_id in ['menu_notice', 'menu_rating']:
+            job = scheduler.get_job(job_id)
+            if job and job.next_run_time.date() == datetime.now().date():
+                scheduler.remove_job(job_id)
+
+        embedinfo("오늘의 알림이 취소되었습니다.")
+    except Exception as e:
+        embedwarning("오류: " + e)
     
 # 테스트 코드
 @app.event
@@ -622,21 +635,12 @@ async def readnote(ctx):
     await ctx.send(f'현재 패치 노트 내용:\n{notes}')
 
 @app.command()
-async def delnote(ctx, *, note: str):
-    with open('patch_notes.txt', 'r') as file:
-        lines = file.readlines()
-
-        # Check if the note exists in the file
-    if note + '' not in lines:
-        await ctx.send(f'존재하지 않는 내용: {note}')
-        return
+async def delnote(ctx):
 
     with open('patch_notes.txt', 'w') as file:
-        for line in lines:
-            if line.strip("\n") != note:
-                file.write(line)
+        file.write("")
 
-    await ctx.send(f'내용 삭제됨: {note}')
+    await ctx.send(f'내용 삭제됨')
 
 @app.command()
 async def patchnote(ctx):

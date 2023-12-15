@@ -30,13 +30,12 @@ ATPT_OFCDC_SC_CODE = "J10"
 SD_SCHUL_CODE = "7530767"
 
 
-def get_today_menu(auth_key, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE):
+def get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE):
     # 오늘의 날짜 가져오기
     today = date.today().strftime("%Y%m%d")
 
     # API 요청을 위한 URL 생성
-    url = f"https://open.neis.go.kr/hub/mealServiceDietInfo?KEY={AUTH_KEY}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE={ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE={SD_SCHUL_CODE}&MLSV_YMD={20231124}"
-
+    url = f"https://open.neis.go.kr/hub/mealServiceDietInfo?KEY={AUTH_KEY}&Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE={ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE={SD_SCHUL_CODE}&MLSV_YMD={today}"
 
     # API 요청 보내기
     response = requests.get(url)
@@ -44,7 +43,11 @@ def get_today_menu(auth_key, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE):
     if response.status_code == 200:
         # JSON 데이터 파싱
         data = json.loads(response.text)
-        print(data)
+
+        # API 반환값에서 'CODE': 'INFO-200' 부분을 감지
+        if 'RESULT' in data and data['RESULT']['CODE'] == 'INFO-200':
+            return "API 요청에 오류가 발생했습니다."
+
         # 메뉴 정보 추출
         menu_string = data["mealServiceDietInfo"][1]["row"][0]["DDISH_NM"]
 
@@ -57,6 +60,7 @@ def get_today_menu(auth_key, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE):
         return menu_list_allergiesinfo
     else:
         return "API 요청에 실패했습니다."
+
 
 def check_menu(menu_raw):
     # 공백 문자 제거 및 알레르기 정보 삭제
@@ -85,13 +89,19 @@ def check_allergies(menu_raw):
 def get_menu_info():
     # 오늘의 급식 정보 받아오기
     menu_raw = get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE)
-    today_menu = check_menu(menu_raw)
-    today_allergens = check_allergies(menu_raw)
 
-    for menu in today_menu:
-        print(menu)
-        locals()[menu] = menu
-    return today_menu, today_allergens
+    if menu_raw == "API 요청에 오류가 발생했습니다.":
+        print("API 요청에 실패했습니다.")
+        return []
+
+    else:
+        today_menu = check_menu(menu_raw)
+        today_allergens = check_allergies(menu_raw)
+
+        return today_menu, today_allergens
+
+print(get_menu_info())
+
 
 # print(today_menu)
 # print(today_allergens)
