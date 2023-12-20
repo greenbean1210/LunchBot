@@ -128,7 +128,7 @@ async def menu_notice():
     # scheduler.add_job(menu_notice, 'date', run_date=next_run_time)
     today_menu_list, today_allergens__list = get_menu_info()
     
-    today_menu = ', '.join(today_menu_list)
+    today_menu = '\n'.join(today_menu_list)
     today_allergens = '\n'.join(today_allergens__list)
     channel = app.get_channel(1144834533200498738)
 
