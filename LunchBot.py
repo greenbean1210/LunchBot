@@ -34,14 +34,14 @@ import sys
 import logging
 import colorlog
 
+# 
 # from Lunch_info import get_menu_info
 from Token_info import get_token
 from Help import help
 from Menu_info import get_menu_info
 
+
 version_manager = VersionManager('version.txt', 'commit_hash.txt')
-
-
 
 
 intents = discord.Intents.all()
@@ -128,7 +128,7 @@ async def menu_notice():
     # scheduler.add_job(menu_notice, 'date', run_date=next_run_time)
     today_menu_list, today_allergens__list = get_menu_info()
     
-    today_menu = '\n'.join(today_menu_list)
+    today_menu = ', '.join(today_menu_list)
     today_allergens = '\n'.join(today_allergens__list)
     channel = app.get_channel(1144834533200498738)
 
@@ -136,6 +136,23 @@ async def menu_notice():
     # embed.add_field(name=today_menu, value="", inline=False)
     
     await channel.send(embed=embed)
+
+
+# 급식 정보 보내기
+async def menu_allergies(ctx):
+    today_menu_list, today_allergens__list = get_menu_info()
+    
+    today_menu = '\n'.join(today_menu_list)
+    today_allergens = ', '.join(today_allergens__list)
+
+    # channel = app.get_channel(1144834533200498738)
+    channel = ctx
+    embed = discord.Embed(title="알레르기 정보", description=today_allergens, color=0x00ff00)
+    # embed.add_field(name=today_menu, value="", inline=False)
+    
+    await channel.send(embed=embed)
+
+
 
 
 
@@ -321,6 +338,10 @@ scheduler.add_job(log_status, 'cron', minute=0) # "생존신고"
 @app.command(pass_context=True)
 async def 급식(ctx, *, args=None):
     await menu_notice()
+
+@app.command(pass_context=True)
+async def 알레르기(ctx, *, args=None):
+    await menu_allergies(ctx)
     
 @app.command(pass_context=True)
 async def gr(ctx, *, args=None):

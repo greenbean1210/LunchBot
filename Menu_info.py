@@ -92,10 +92,11 @@ def get_menu_info():
 
     if menu_raw == "API 요청에 오류가 발생했습니다.":
         print("API 요청에 실패했습니다.")
-        return []
+        return ["APIfail"]
 
     else:
-        today_menu = check_menu(menu_raw)
+        # today_menu = check_menu(menu_raw)
+        today_menu = check_menu(get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE))
         today_allergens = check_allergies(menu_raw)
 
         return today_menu, today_allergens
@@ -106,4 +107,4 @@ print(get_menu_info())
 # print(today_menu)
 # print(today_allergens)
 
-get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE)
+# get_today_menu(AUTH_KEY, ATPT_OFCDC_SC_CODE, SD_SCHUL_CODE)
