@@ -535,6 +535,16 @@ async def on_reaction_remove(reaction, user):
 
 
 
+@app.command()
+async def 도움말(ctx):
+    try:
+        embed = await help()
+        ping = (round(app.latency * 1000))
+        embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
+        await ctx.channel.send (embed=embed)
+    except Exception as e:
+        print(e)
+
 
 
 # ----------------------------------------------------------------------------------------------------------------------------------
@@ -632,80 +642,88 @@ async def rmpk(ctx):
         pickle.dump(data, f)
 
 
-@app.command()
-async def 도움말(ctx):
-    try:
-        embed = await help()
-        ping = (round(app.latency * 1000))
-        embed.add_field(name="Ping", value="`{}`ms".format(ping), inline=True)
-        await ctx.channel.send (embed=embed)
-    except Exception as e:
-        print(e)
-
 
 @app.command()
 async def addnote(ctx, *, note: str):
-    with open('patch_notes.txt', 'a') as file:
-        file.write(note + '\n')
-    await ctx.send(f'패치 노트에 추가됨: {note}')
-
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        with open('patch_notes.txt', 'a') as file:
+            file.write(note + '\n')
+        await ctx.send(f'패치 노트에 추가됨: {note}')
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
+   
 @app.command()
 async def readnote(ctx):
-    with open('patch_notes.txt', 'r') as file:
-        notes = file.read()
-    await ctx.send(f'현재 패치 노트 내용:\n{notes}')
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        with open('patch_notes.txt', 'r') as file:
+            notes = file.read()
+        await ctx.send(f'현재 패치 노트 내용:\n{notes}')
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
+    
 
 @app.command()
 async def delnote(ctx):
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        with open('patch_notes.txt', 'w') as file:
+            file.write("")
 
-    with open('patch_notes.txt', 'w') as file:
-        file.write("")
-
-    await ctx.send(f'내용 삭제됨')
+        await ctx.send(f'내용 삭제됨')
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
 @app.command()
 async def patchnote(ctx):
-    with open('patch_notes.txt', 'r') as file:
-        notes = file.read()
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        with open('patch_notes.txt', 'r') as file:
+            notes = file.read()
 
-    version_manager.check_commit()
-    version = f'{version_manager.major_version}.{version_manager.minor_version}'
+        version_manager.check_commit()
+        version = f'{version_manager.major_version}.{version_manager.minor_version}'
 
 
-    # Create an embed message
-    embed = discord.Embed(title=f"📝 {version}버전 패치 노트", description=notes, color=0x00ff00)
-    channel = app.get_channel(1144839284617117736)
-    await channel.send(embed=embed)
+        # Create an embed message
+        embed = discord.Embed(title=f"📝 {version}버전 패치 노트", description=notes, color=0x00ff00)
+        channel = app.get_channel(1144839284617117736)
+        await channel.send(embed=embed)
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
 
 
 
 @app.command()
 async def send_result(ctx, date: str):
-    # 'YYYYMMDD' 형태의 문자열을 입력받아 파일명 생성
-    filename = f'results_{date}.txt'
-    
-    # 해당 파일이 존재하는지 확인
-    if not os.path.exists(filename):
-        await embedwarning(f'{date}의 결과가 없습니다.', ctx)
-        return
-    
-    # 존재한다면 파일 전송
-    await ctx.send(file=discord.File(filename))
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        # 'YYYYMMDD' 형태의 문자열을 입력받아 파일명 생성
+        filename = f'results_{date}.txt'
+        
+        # 해당 파일이 존재하는지 확인
+        if not os.path.exists(filename):
+            await embedwarning(f'{date}의 결과가 없습니다.', ctx)
+            return
+        
+        # 존재한다면 파일 전송
+        await ctx.send(file=discord.File(filename))
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
 
 
 @app.command()
 async def list_results(ctx):
-    print(os.listdir())
-    result_files = [filename for filename in os.listdir() if filename.startswith('results_')]
-    
-    if not result_files:
-        await ctx.send('저장된 결과 파일이 없습니다.')
-        return
-    
-    file_list = '\n'.join(result_files)
-    await ctx.send(f'저장된 결과 파일 목록:\n`{file_list}`')
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        print(os.listdir())
+        result_files = [filename for filename in os.listdir() if filename.startswith('results_')]
+        
+        if not result_files:
+            await ctx.send('저장된 결과 파일이 없습니다.')
+            return
+        
+        file_list = '\n'.join(result_files)
+        await ctx.send(f'저장된 결과 파일 목록:\n`{file_list}`')
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
 
 @app.command()
@@ -726,12 +744,20 @@ async def version(ctx):
 
 @app.command()
 async def increment_minor(ctx):
-    version_manager.increment_minor()
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        version_manager.increment_minor()
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
 @app.command()
 async def decrement_minor(ctx):
-    version_manager.decrement_minor()
+    if ctx.message.author.guild_permissions.administrator: # 관리자 권한 확인
+        version_manager.decrement_minor()
+    else:
+        await ctx.send('관리자만 이 명령어를 사용할 수 있습니다.')
 
+
+# -----------------------------------------------------------------------------
 
 # 디버그 코드 함수
 async def loggerwarning(str, ctx):
