@@ -22,9 +22,9 @@ async def help():
     elif device == 'Darwin':
         version = "Dev"
     elif device == 'Linux':
-        version = f'{version_manager.major_version}.{version_manager.minor_version} + "Beta"'
+        version = f'{version_manager.major_version}.{version_manager.minor_version} Beta'
     else:
-        version = f'{version_manager.major_version}.{version_manager.minor_version} + "Beta"'
+        version = f'{version_manager.major_version}.{version_manager.minor_version} Beta'
 
     
     embed = discord.Embed(title="도움말", description="급식이#2677 도움말입니다.", timestamp=datetime.now(), color=0xFFFFFF)
