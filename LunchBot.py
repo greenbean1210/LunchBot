@@ -115,7 +115,16 @@ async def on_ready():
     game = discord.Game("오늘의 급식 정보를 알려 드립니다!")
     await app.change_presence(activity=game)
     scheduler.start()
-    
+
+@app.event
+async def on_member_join(member):
+    role_id = 1179309457914732564  # 역할의 고유 ID 입력
+    role = discord.utils.get(member.guild.roles, id=role_id)
+    if role is not None:
+        await member.add_roles(role)
+        print(f'{member}에게 역할 부여 완료')
+    else:
+        print('역할을 찾을 수 없습니다.')
 
 @app.command()
 async def versioncheck(ctx):
@@ -624,6 +633,8 @@ async def rmpk(ctx):
 
     except Exception as e:
         logger.error(e)
+
+
     # # 만약 메시지 ID가 데이터에 있다면, 해당 항목 삭제
     # if message_id in data or int(message_id) in data:
     #     if message_id in data:
@@ -642,6 +653,9 @@ async def rmpk(ctx):
         pickle.dump(data, f)
 
 
+@app.command()
+async def ym(ctx):
+    ctx.send(yesterday_menu_info)
 
 @app.command()
 async def addnote(ctx, *, note: str):
@@ -683,7 +697,7 @@ async def patchnote(ctx):
 
 
         # Create an embed message
-        embed = discord.Embed(title=f"📝 {version}버전 패치 노트", description=notes, color=0x00ff00)
+        embed = discord.Embed(title=f"📝 {version}버전 업데이트 내용", description=notes, color=0x00ff00)
         channel = app.get_channel(1144839284617117736)
         await channel.send(embed=embed)
     else:
