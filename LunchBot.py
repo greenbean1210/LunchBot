@@ -141,7 +141,7 @@ async def menu_notice():
     today_allergens = '\n'.join(today_allergens__list)
     channel = app.get_channel(1144834533200498738)
 
-    embed = discord.Embed(title="🍚 오늘의 급식", description=today_menu, color=0x00ff00)
+    embed = discord.Embed(title="🍚 오늘의 급식", description=today_menu, color=0xFFFFFF)
     # embed.add_field(name=today_menu, value="", inline=False)
     
     await channel.send(embed=embed)
@@ -156,7 +156,7 @@ async def menu_allergies(ctx):
 
     # channel = app.get_channel(1144834533200498738)
     channel = ctx
-    embed = discord.Embed(title="알레르기 정보", description=today_allergens, color=0x00ff00)
+    embed = discord.Embed(title="알레르기 정보", description=today_allergens, color=0xFFFFFF)
     # embed.add_field(name=today_menu, value="", inline=False)
     
     await channel.send(embed=embed)
@@ -198,7 +198,7 @@ async def menu_rating():
         logchannel = app.get_channel(1144838499472789604)
         today_menu_list, today_allergens__list = get_menu_info()
         today_menu = '\n'.join(today_menu_list)
-        embed = discord.Embed(title="🤔 오늘의 급식은 어떠셨나요?", description="오늘의 급식에 대해 알려주세요.", color=0x00ff00)
+        embed = discord.Embed(title="🤔 오늘의 급식은 어떠셨나요?", description="오늘의 급식에 대해 알려주세요.", color=0xFFFFFF)
         embed.add_field(name="오늘의 급식이 뭐였냐면...", value=today_menu, inline=False)
         embed.add_field(name="아래의 이모지를 눌러주세요.", value="하나만 누를 수 있습니다.", inline=False)
 
