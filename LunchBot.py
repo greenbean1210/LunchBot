@@ -338,7 +338,7 @@ def log_status():
 scheduler = AsyncIOScheduler(timezone='Asia/Seoul')
 
 scheduler.add_job(menu_notice, 'cron', day_of_week='mon-fri', hour=8, minute=50, id="menu_notice") # 8시 50분 급식 메뉴 알림
-scheduler.add_job(menu_rating, 'cron', day_of_week='mon-sat', hour=13, minute=50, id="menu_rating") # 1시 50분 급식 평가 알림
+# scheduler.add_job(menu_rating, 'cron', day_of_week='mon-sat', hour=13, minute=50, id="menu_rating") # 1시 50분 급식 평가 알림
 scheduler.add_job(log_status, 'cron', minute=0) # "생존신고"
 
 
